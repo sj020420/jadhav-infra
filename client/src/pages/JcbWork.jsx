@@ -1,0 +1,75 @@
+import React, { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useData } from '../DataContext.jsx';
+import { METHODS, PAY_STATUS, WORK_TYPES } from '../constants.js';
+import { jobCols } from '../columns.js';
+import { sum } from '../calc.js';
+import { fmt12, fmtDate, inr } from '../utils.js';
+import CrudPage from '../components/CrudPage.jsx';
+import JcbWorkForm from '../forms/JcbWorkForm.jsx';
+import PaymentForm from '../forms/PaymentForm.jsx';
+import { Modal } from '../components/ui.jsx';
+
+export default function JcbWork() {
+  const { D } = useData();
+  const nav = useNavigate();
+  const [sp, setSp] = useSearchParams();
+  const [view, setView] = useState(null);
+  const [pay, setPay] = useState(null);
+  const names = [...new Set(D.jobs.map((j) => j.customerName))].sort();
+  return (
+    <>
+      <CrudPage
+        title="JCB Work" collection="jobs" rows={D.jobs} columns={jobCols} Form={JcbWorkForm} addLabel="+ Add New JCB Work"
+        openNew={sp.get('new')} onNewHandled={() => setSp({})}
+        filters={[
+          { key: 'customerName', label: 'Customer', options: names },
+          { key: 'status', label: 'Payment Status', options: PAY_STATUS },
+          { key: 'workType', label: 'Work Type', options: WORK_TYPES },
+          { key: 'method', label: 'Payment Method', options: METHODS },
+        ]}
+        summary={(r) => [['Jobs', r.length], ['Total Hours', sum(r, (j) => j.hours)], ['Total Billing', inr(sum(r, (j) => j.total)), 'green'], ['Paid', inr(sum(r, (j) => j.paid))], ['Pending', inr(sum(r, (j) => j.pending)), 'red']]}
+        deleteText={(r) => `Delete the job for ${r.customerName} on ${fmtDate(r.date)}? This cannot be undone.`}
+        extraActions={(r) => (
+          <>
+            <button className="btn sm" onClick={() => setView(r)}>👁 View</button>
+            {r.pending > 0 && <button className="btn sm primary" onClick={() => setPay(r)}>💵 Pay</button>}
+            <button className="btn sm" onClick={() => nav(`/invoices?job=${r.id}`)}>📄 Invoice</button>
+          </>
+        )}
+      />
+      {pay && (
+        <Modal title={`Receive Payment - ${pay.customerName}`} onClose={() => setPay(null)}>
+          <PaymentForm job={pay} onDone={() => setPay(null)} onCancel={() => setPay(null)} />
+        </Modal>
+      )}
+      {view && (
+        <Modal title="JCB Work Details" onClose={() => setView(null)}>
+          <div className="kv">
+            <span>Customer</span><b>{view.customerName}</b><span>Mobile</span><b>{view.mobile}</b>
+            <span>Location</span><b>{view.location || '-'}</b><span>Work Type</span><b>{view.workType}</b>
+            <span>Date</span><b>{fmtDate(view.date)}</b><span>Time</span><b>{fmt12(view.start)} to {fmt12(view.end)}</b>
+            <span>Hours</span><b>{view.hours}</b><span>Rate</span><b>{inr(view.rate)}/hr</b>
+            {view.calculatedTotal !== undefined && view.calculatedTotal !== null && view.calculatedTotal !== view.total && (
+              <><span>Original/Calculated Price</span><b>{inr(view.calculatedTotal)}</b></>
+            )}
+            {view.finalPrice !== null && view.finalPrice !== undefined && (
+              <><span>Admin Final Price</span><b>{inr(view.finalPrice)}</b></>
+            )}
+            <span>Final Total</span><b>{inr(view.total)}</b><span>Paid</span><b>{inr(view.paid)}</b><span>Pending</span><b>{inr(view.pending)}</b>
+            <span>Status</span><b><span className={`badge ${view.status}`}>{view.status}</span></b>
+            {(view.payments || []).map((p, i) => (<React.Fragment key={i}><span>Payment {i + 1}</span><b>{inr(p.amount)} · {p.method} · {fmtDate(p.date)}</b></React.Fragment>))}
+            {view.notes && <><span>Notes</span><b>{view.notes}</b></>}
+          </div>
+          {view.pending > 0 && (
+            <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+              <button className="btn primary" onClick={() => { const j = view; setView(null); setPay(j); }}>
+                💵 Receive Payment ({inr(view.pending)} Pending)
+              </button>
+            </div>
+          )}
+        </Modal>
+      )}
+    </>
+  );
+}
