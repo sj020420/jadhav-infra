@@ -166,12 +166,12 @@ export default function JcbWorkForm({ initial, onDone, onCancel }) {
       </Field>
       {v.customerId === '__new' ? (
         <>
-          <Field label="New Customer Name (optional)" err={err.newName}><input {...F.bind('newName')} placeholder="Optional name" /></Field>
-          <Field label="Customer Mobile (optional)" err={err.newMobile}><input {...F.bind('newMobile')} inputMode="numeric" maxLength={10} placeholder="Optional mobile" /></Field>
+          <Field label="New Customer Name (optional)" err={err.newName}><input {...F.bind('newName')} autoCapitalize="words" placeholder="Optional name" /></Field>
+          <Field label="Customer Mobile (optional)" err={err.newMobile}><input {...F.bind('newMobile')} type="tel" inputMode="numeric" maxLength={10} autoComplete="tel" placeholder="10-digit mobile" /></Field>
         </>
       ) : selected && <Field label="Customer Mobile"><input value={selected.mobile || '-'} disabled /></Field>}
 
-      <Field label="Site / Work Location"><input {...F.bind('location')} placeholder="e.g. Baramati MIDC" /></Field>
+      <Field label="Site / Work Location"><input {...F.bind('location')} autoCapitalize="words" placeholder="e.g. Baramati MIDC" /></Field>
       <Field label="Work Type"><select {...F.bind('workType')}>{WORK_TYPES.map((w) => <option key={w}>{w}</option>)}</select></Field>
       <Field label="Date *" err={err.date}><input type="date" {...F.bind('date')} /></Field>
       <Field label="Rate Per Hour (₹) *" err={err.rate}><input {...F.bind('rate')} inputMode="decimal" type="number" min="0" step="any" /></Field>

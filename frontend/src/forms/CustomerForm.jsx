@@ -26,12 +26,12 @@ export default function CustomerForm({ initial, onDone, onCancel }) {
   );
   return (
     <form onSubmit={F.submit} className="form" noValidate>
-      <Field label="Customer Name (optional)" err={F.err.name}><input {...F.bind('name')} autoFocus placeholder="Optional (e.g. Ramesh Patil)" /></Field>
-      <Field label="Mobile *" err={F.err.mobile}><input {...F.bind('mobile')} inputMode="numeric" maxLength={10} /></Field>
-      <Field label="Address" full><input {...F.bind('address')} /></Field>
-      <Field label="GSTIN (optional)" err={F.err.gstin}><input {...F.bind('gstin')} maxLength={15} /></Field>
-      <Field label="Email (optional)" err={F.err.email}><input {...F.bind('email')} type="email" /></Field>
-      <Field label="Notes" full><textarea rows={2} {...F.bind('notes')} /></Field>
+      <Field label="Customer Name (optional)" err={F.err.name}><input {...F.bind('name')} autoCapitalize="words" autoComplete="name" placeholder="Optional (e.g. Ramesh Patil)" /></Field>
+      <Field label="Mobile *" err={F.err.mobile}><input {...F.bind('mobile')} type="tel" inputMode="numeric" maxLength={10} autoComplete="tel" placeholder="10-digit mobile number" /></Field>
+      <Field label="Address" full><input {...F.bind('address')} autoCapitalize="sentences" placeholder="e.g. Village, Tehsil" /></Field>
+      <Field label="GSTIN (optional)" err={F.err.gstin}><input {...F.bind('gstin')} autoCapitalize="characters" maxLength={15} placeholder="15-character GSTIN" /></Field>
+      <Field label="Email (optional)" err={F.err.email}><input {...F.bind('email')} type="email" inputMode="email" autoComplete="email" placeholder="name@example.com" /></Field>
+      <Field label="Notes" full><textarea rows={2} {...F.bind('notes')} placeholder="Optional notes" /></Field>
       <FormActions busy={F.busy} onCancel={onCancel} />
     </form>
   );

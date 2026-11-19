@@ -70,10 +70,12 @@ export const expVal = (c, r, pdf = false) => {
   return v;
 };
 
-// Small browser-side preferences (NOT business data): last used values, default rate
-const read = (k) => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
-const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } };
-export const getLast = () => read('ji_last');
-export const setLast = (v) => write('ji_last', v);
-export const getSettings = () => ({ rate: '', machine: 'JCB', ...read('ji_settings') });
-export const setSettings = (v) => write('ji_settings', v);
+// In-memory runtime session defaults only (No browser persistence in localStorage/sessionStorage/cookies)
+let _last = {};
+let _settings = { rate: '', machine: 'JCB' };
+
+export const getLast = () => ({ ..._last });
+export const setLast = (v) => { _last = { ..._last, ...v }; };
+export const getSettings = () => ({ ..._settings });
+export const setSettings = (v) => { _settings = { ..._settings, ...v }; };
+
