@@ -1,0 +1,23 @@
+# Render Blueprint - backend (Express). Database = Neon, Frontend = Vercel.
+services:
+  - type: web
+    name: jadhav-infra-backend
+    runtime: node
+    plan: free
+    buildCommand: npm --prefix database install && npm --prefix backend install
+    # creates the tables (idempotent) and then starts the API
+    startCommand: npm --prefix database run migrate && npm --prefix backend start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false      # paste your Neon connection string in the Render dashboard
+      - key: FRONTEND_URL
+        sync: false      # paste your Vercel URL (https://xxxx.vercel.app) after the frontend is deployed
+      - key: ADMIN_USERNAME
+        value: aj1818
+      - key: ADMIN_PASSWORD
+        sync: false      # type the password in the Render dashboard (kept out of GitHub)
+      - key: JWT_SECRET
+        generateValue: true

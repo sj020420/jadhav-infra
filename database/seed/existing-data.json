@@ -1,0 +1,174 @@
+{
+  "app": "jadhav-infra",
+  "data": {
+    "customers": [
+      {
+        "name": "swapnil jadhav",
+        "mobile": "8686011001",
+        "address": "",
+        "gstin": "",
+        "email": "",
+        "notes": "",
+        "id": "128276c5-5f7a-4239-9ae6-c484c66d5002",
+        "createdAt": "2026-11-18T11:36:30.818Z"
+      },
+      {
+        "name": "ashish jadhav",
+        "mobile": "7071771818",
+        "address": "",
+        "gstin": "",
+        "email": "",
+        "notes": "",
+        "id": "471b8fd4-a593-43d5-abd1-3d6e6ac113de",
+        "createdAt": "2026-11-18T11:37:17.689Z"
+      },
+      {
+        "name": "swapnil jadhav1",
+        "mobile": "8686011001",
+        "address": "",
+        "gstin": "",
+        "email": "",
+        "notes": "",
+        "id": "4c83dd37-e9a8-494a-8c4c-3a5a1dcccdc5",
+        "createdAt": "2026-11-18T11:52:25.773Z"
+      }
+    ],
+    "jobs": [
+      {
+        "customerId": "128276c5-5f7a-4239-9ae6-c484c66d5002",
+        "customerName": "swapnil jadhav",
+        "mobile": "8686011001",
+        "location": "malegaon",
+        "workType": "Pipeline",
+        "date": "2026-11-18",
+        "start": "07:00",
+        "end": "20:08",
+        "hours": 13.13,
+        "rate": 1100,
+        "total": 14443,
+        "payments": [
+          {
+            "date": "2026-11-18",
+            "amount": 14000,
+            "method": "UPI"
+          }
+        ],
+        "paid": 14000,
+        "pending": 443,
+        "status": "Partial",
+        "method": "UPI",
+        "notes": "dfsf",
+        "id": "d7b009b3-82e8-4870-ab15-cc586b83a298",
+        "createdAt": "2026-11-18T11:36:30.829Z"
+      },
+      {
+        "customerId": "471b8fd4-a593-43d5-abd1-3d6e6ac113de",
+        "customerName": "ashish jadhav",
+        "mobile": "7071771818",
+        "location": "malegaon bk",
+        "workType": "Road Work",
+        "date": "2026-11-18",
+        "start": "19:07",
+        "end": "22:07",
+        "hours": 3,
+        "rate": 1100,
+        "total": 3300,
+        "payments": [
+          {
+            "date": "2026-11-18",
+            "amount": 1000,
+            "method": "UPI"
+          }
+        ],
+        "paid": 1000,
+        "pending": 2300,
+        "status": "Partial",
+        "method": "UPI",
+        "notes": "werwr",
+        "id": "39977760-4f1d-4065-b76a-06e5c8d6c6fe",
+        "createdAt": "2026-11-18T11:37:17.695Z"
+      },
+      {
+        "customerId": "4c83dd37-e9a8-494a-8c4c-3a5a1dcccdc5",
+        "customerName": "swapnil jadhav1",
+        "mobile": "8686011001",
+        "location": "abc",
+        "workType": "Excavation",
+        "date": "2026-11-18",
+        "start": "20:22",
+        "end": "22:22",
+        "hours": 2,
+        "rate": 1100,
+        "calculatedTotal": 2200,
+        "finalPrice": 2000,
+        "total": 2000,
+        "payments": [
+          {
+            "date": "2026-11-18",
+            "amount": 1800,
+            "method": "UPI"
+          }
+        ],
+        "paid": 1800,
+        "pending": 200,
+        "status": "Partial",
+        "method": "UPI",
+        "notes": "dsf",
+        "id": "479e7c01-aa13-4c20-a2db-f1c36fc3e41b",
+        "createdAt": "2026-11-18T11:52:25.780Z"
+      }
+    ],
+    "expenses": [],
+    "diesel": [],
+    "employee_payments": [
+      {
+        "date": "2026-11-18",
+        "name": "ram",
+        "personType": "Driver",
+        "reason": "",
+        "amount": 5000,
+        "method": "Cash",
+        "status": "Paid",
+        "notes": "ashish jadhav",
+        "id": "484a4372-d405-4be9-bc55-4bb038b88787",
+        "createdAt": "2026-11-18T11:39:15.298Z"
+      }
+    ],
+    "invoices": [
+      {
+        "number": "JI/2026-27/0001",
+        "date": "2026-11-18",
+        "jobId": "d7b009b3-82e8-4870-ab15-cc586b83a298",
+        "notes": "rtet",
+        "customer": {
+          "name": "swapnil jadhav",
+          "mobile": "8686011001",
+          "address": "",
+          "gstin": ""
+        },
+        "work": {
+          "date": "2026-11-18",
+          "description": "Pipeline work (JCB)",
+          "location": "malegaon",
+          "start": "07:00",
+          "end": "20:08",
+          "hours": 13.13,
+          "rate": 1100,
+          "amount": 14443
+        },
+        "gstEnabled": false,
+        "gstRate": 0,
+        "igst": false,
+        "subtotal": 14443,
+        "gstAmount": 0,
+        "grandTotal": 14443,
+        "paid": 14000,
+        "pending": 443,
+        "method": "UPI",
+        "status": "Partial",
+        "id": "4a25dbaf-2595-4257-87b6-9368ff16b30d",
+        "createdAt": "2026-11-18T11:39:46.082Z"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "jadhav-infra-database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "JADHAV INFRA - PostgreSQL (Neon) schema, migration and data import",
+  "scripts": {
+    "migrate": "node migrate.js",
+    "import": "node import-data.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.1"
+  },
+  "engines": { "node": ">=20" }
+}

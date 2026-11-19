@@ -1,73 +1,117 @@
 # JADHAV INFRA – JCB Rental Management
 
-Full app: **React (Vite) frontend + Node/Express backend + SQLite database**.
-Mobile-first. All data is saved in a real database file – nothing is lost on refresh.
+तीन वेगळे भाग:
 
-## 1. Requirements
-- **Node.js 20 or newer** (https://nodejs.org)
+| Folder | काय आहे | Deploy कुठे |
+|---|---|---|
+| `frontend/` | React (Vite) app | **Vercel** |
+| `backend/`  | Express REST API | **Render** |
+| `database/` | PostgreSQL schema + migrate + data import | **Neon** |
 
-## 2. First-time setup (once)
-```bash
-cd jadhav-infra
-npm install          # installs the small root helper (concurrently)
-npm run setup        # installs server + client packages
-```
-
-## 3. Run (development – frontend + backend together)
-```bash
-npm run dev
-```
-- App:  http://localhost:5173   (open this)
-- API:  http://localhost:5001/api
-- **On your phone** (same Wi-Fi): open `http://<your-computer-IP>:5173`
-
-The database file is created automatically at `server/data/jadhav_infra.db`.
-
-## 4. Run for real use (one server, one URL)
-```bash
-npm run build        # builds the frontend into client/dist
-npm start            # serves app + API on http://localhost:5001
-```
-To use it from anywhere, deploy this folder to a VPS / Render / Railway / any Node host
-(keep `server/data/` on a persistent disk) and open the server URL on your phone.
-
-## 5. Project structure
 ```
 jadhav-infra/
-├─ server/
-│  ├─ index.js        Express REST API  (/api/:collection  GET, POST, PUT/:id, DELETE/:id)
-│  ├─ db.js           SQLite connection (better-sqlite3), creates tables on start
-│  ├─ schema.sql      DATABASE FILE – table definitions
-│  ├─ .env            PORT, DB_FILE
-│  └─ data/           jadhav_infra.db is created here
-└─ client/
-   └─ src/
-      ├─ api.js            ← the ONLY file that talks to the backend
-      ├─ DataContext.jsx   loads / saves all data, toasts
-      ├─ constants.js      company details, dropdown lists
-      ├─ utils.js, calc.js, columns.js, export.js (Excel + PDF)
-      ├─ components/       DataTable, CrudPage, Invoice, ReportTable, Modal, SummaryCard, DateRangeFilter, Layout
-      ├─ forms/            CustomerForm, JcbWorkForm, ExpenseForm, DieselForm, EmployeePaymentForm, PaymentForm
-      └─ pages/            Dashboard, JcbWork, Customers, Expenses, Diesel,
-                           Employees, Reports, Invoices, Settings
+├─ frontend/   src/, vercel.json, .env.example
+├─ backend/    index.js, db.js, .env.example
+├─ database/   schema.sql, migrate.js, import-data.js, seed/existing-data.json
+├─ render.yaml           (Render blueprint)
+└─ package.json          (local dev scripts)
 ```
-Database tables: `customers, jobs, expenses, diesel, employee_payments, invoices`.
 
-## 6. How it works (important rules)
-- **Hours** = End − Start. If end time is earlier than start, the job is treated as running past midnight (shown as "next day"). Same start & end is rejected.
-- **Total** = Hours × Rate. **Pending** = Total − Paid. Status (Paid/Unpaid/Partial) follows the paid amount.
-- **Payments**: first paid amount is saved with the job; later part-payments are added directly in **JCB Work → Pay / Receive Payment**, with date and method.
-- **Expenses** page shows everything going out: manual expenses + Diesel entries + *Paid* driver/employee payments (Pending ones are not counted until paid). Profit = JCB billing − all of these.
-- **Income** in dashboard/P&L = amount billed for jobs (not only cash received).
-- **Invoice**: GST is OFF unless ticked. Maharashtra (27) or no customer GSTIN → CGST+SGST; other state GSTIN → IGST. Number format `JI/2026-27/0001`.
-- **PDF** uses "Rs." instead of ₹ (the standard PDF font cannot print ₹). Excel and screen use ₹.
-- **Deleting a customer** is blocked while they have jobs.
+---------------------------------------------------------------------
 
-## 7. Backup
-Settings → **Download Backup** (JSON) / **Restore**. Also copy `server/data/jadhav_infra.db` regularly.
+## A. आधी GitHub वर टाका
 
-## 8. Change company details
-Edit `client/src/constants.js`.
+तुमच्या जुन्या repo मध्ये `client/`, `server/`, `node_modules/` आणि `*.db` files होत्या. त्या काढून नवीन folders टाका:
 
-## 9. Security note
-There is no login yet – anyone who can open the URL can see the data. If you host it on the internet, add a login or keep it on your home/office network. Ask for this as the next step.
+```bash
+cd jadhav-infra                      # तुमचा जुना repo folder
+git rm -r --cached node_modules client server -q
+rm -rf client server node_modules
+# आता या zip मधले frontend/ backend/ database/ render.yaml package.json .gitignore README.md इथे copy करा
+git add -A
+git commit -m "Split into frontend/backend/database, move to Postgres"
+git push
+```
+> Repo **Private** ठेवा – जुन्या commits मध्ये ग्राहकांचा data (`.db` file) आहे.
+
+---------------------------------------------------------------------
+
+## B. Database – Neon
+
+1. https://neon.tech → Sign up → **Create project** (Region: Singapore – भारताला जवळ).
+2. Dashboard मध्ये **Connect** दाबा → connection string copy करा. असा दिसतो:
+   `postgresql://user:password@ep-xxxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`
+   (शेवटी `?sslmode=require` असणे आवश्यक.)
+3. **जुना data (3 customers, 3 jobs, 1 invoice…) Neon मध्ये टाकायचा असेल** – तुमच्या computer वर:
+   ```bash
+   cd database
+   cp .env.example .env          # .env उघडून DATABASE_URL मध्ये Neon string paste करा
+   npm install
+   npm run migrate               # tables बनतात
+   npm run import                # seed/existing-data.json मधला जुना data जातो
+   ```
+   नवीन, रिकामा सुरू करायचा असेल तर `migrate` / `import` काहीच नको – Render सुरू होताना tables आपोआप बनवतो.
+
+---------------------------------------------------------------------
+
+## C. Backend – Render
+
+1. https://render.com → **New + → Blueprint** → तुमचा GitHub repo निवडा (`render.yaml` आपोआप सापडतो).
+   *(किंवा **New + → Web Service** आणि हे भरा: Build Command `npm --prefix database install && npm --prefix backend install`, Start Command `npm --prefix database run migrate && npm --prefix backend start`, Health Check Path `/api/health`, Root Directory रिकामे.)*
+2. Environment variables:
+   - `DATABASE_URL` = Neon ची connection string
+   - `ADMIN_PASSWORD` = तुमचा login password (**इथेच टाका – GitHub वर कधीही नको**)
+   - `ADMIN_USERNAME` (`aj1818`) आणि `JWT_SECRET` आपोआप भरले जातात
+   - `FRONTEND_URL` = आत्ता रिकामे/तात्पुरते ठेवा (Vercel नंतर)
+3. Deploy झाल्यावर URL मिळेल, उदा. `https://jadhav-infra-backend.onrender.com`
+   तपासा: `https://…onrender.com/api/health` → `{"ok":true,"db":"postgres"}` आले पाहिजे.
+
+---------------------------------------------------------------------
+
+## D. Frontend – Vercel
+
+1. https://vercel.com → **Add New → Project** → तोच GitHub repo.
+2. **Root Directory = `frontend`** (Edit दाबून निवडा). Framework: Vite (आपोआप).
+3. Environment Variable:
+   - `VITE_API_URL` = `https://jadhav-infra-backend.onrender.com` (तुमचा Render URL, शेवटी `/` नको)
+4. **Deploy**. Vercel URL मिळेल, उदा. `https://jadhav-infra.vercel.app`
+
+## E. शेवटची जोडणी (महत्त्वाची)
+
+Render → तुमची service → **Environment** → `FRONTEND_URL` = तुमचा Vercel URL (`https://jadhav-infra.vercel.app`, शेवटी `/` नको) → Save (service आपोआप restart होते).
+Custom domain नंतर लावली तर दोन्ही कॉमा ने लिहा: `https://a.vercel.app,https://mydomain.com`
+
+आता Vercel URL फोनवर उघडा – काम झाले. ✅
+
+---------------------------------------------------------------------
+
+## Local मध्ये चालवणे (computer वर)
+
+Node.js 20+ लागेल.
+```bash
+npm install            # root
+npm run setup          # database + backend + frontend packages
+cp backend/.env.example backend/.env     # DATABASE_URL आणि ADMIN_PASSWORD टाका, FRONTEND_URL रिकामे ठेवा
+npm run migrate
+npm run dev            # app: http://localhost:5173   API: http://localhost:5001/api
+```
+
+## महत्त्वाच्या गोष्टी
+
+- **Render Free**: 15 मिनिटे वापर नसेल तर server झोपतो. पहिले उघडणे ~30–60 सेकंद घेऊ शकते – app आपोआप थांबून वाट पाहते (loading दिसते), नंतर सगळे नेहमीसारखे वेगवान.
+- **Neon Free**: पाच मिनिटे idle नंतर database झोपतो, पहिल्या request ला 1–2 सेकंद लागतात. Data सुरक्षित राहतो.
+- **Login**: app उघडल्यावर Username + Password विचारतो. Username/Password फक्त backend (Render Environment) मध्ये असतात – frontend किंवा GitHub मध्ये नाहीत. बदलायचा असेल तर Render → Environment मध्ये `ADMIN_USERNAME` / `ADMIN_PASSWORD` बदला. एकदा login केल्यावर 30 दिवस फोनवर login राहतो; Logout बटन Sidebar / More मेनूमध्ये आहे. 10 चुकीच्या प्रयत्नांनंतर 15 मिनिटे block होते.
+- **Backup**: Settings → Download Backup (JSON). तीच file `cd database && npm run import -- file.json` ने किंवा Settings → Restore ने परत टाकता येते.
+- **Company details बदलणे**: `frontend/src/constants.js`.
+- **Hours/Total/Pending/Invoice/PDF चे नियम** पूर्वीसारखेच आहेत – कोणताही business logic बदललेला नाही.
+
+## Troubleshooting
+
+| त्रास | उपाय |
+|---|---|
+| Browser मध्ये "CORS" error | Render मधला `FRONTEND_URL` Vercel URL शी तंतोतंत जुळतो का (https, शेवटी `/` नको) |
+| "Cannot reach the server" | `VITE_API_URL` बरोबर आहे का; Vercel मध्ये बदलल्यावर **Redeploy** करा (env बदल build वेळी लागतात) |
+| Render log मध्ये `DATABASE_URL is not set` किंवा `ADMIN_USERNAME and ADMIN_PASSWORD must be set` | Render → Environment मध्ये ते variable टाका |
+| Login ला "Wrong username or password" | Render मधला `ADMIN_PASSWORD` तपासा (बदलल्यावर service restart होते) |
+| `SSL/TLS required` error | Neon string च्या शेवटी `?sslmode=require` हवे |
+| Vercel वर refresh केल्यावर 404 | `frontend/vercel.json` repo मध्ये आहे ना ते पाहा; Root Directory `frontend` असावी |

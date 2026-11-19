@@ -1,13 +1,15 @@
 {
   "name": "jadhav-infra",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "JCB Rental Management - JADHAV INFRA (React + Express + SQLite)",
+  "description": "JCB Rental Management - JADHAV INFRA (React frontend + Express backend + PostgreSQL database)",
   "scripts": {
-    "setup": "npm --prefix server install && npm --prefix client install",
-    "dev": "concurrently -n API,WEB -c green,blue \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
-    "build": "npm --prefix client run build",
-    "start": "npm --prefix server start"
+    "setup": "npm --prefix database install && npm --prefix backend install && npm --prefix frontend install",
+    "migrate": "npm --prefix database run migrate",
+    "import": "npm --prefix database run import",
+    "dev": "concurrently -n API,WEB -c green,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
