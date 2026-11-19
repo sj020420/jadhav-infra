@@ -44,7 +44,7 @@ function build(key, D, r, cid) {
       };
     }
     case 'diesel': {
-      const d = D.diesel.filter((x) => inRange(x.date, r)); const l = sum(d, (x) => x.litres), c = sum(d, (x) => x.total);
+      const d = D.diesel.filter((x) => inRange(x.date, r)); const l = sum(d, (x) => x.litres), c = sum(d, (x) => x.finalPrice ?? x.total);
       return { title: 'Diesel Report', summary: [['Total Litres', `${l} L`], money('Total Diesel Cost', c), money('Average Cost / Entry', d.length ? c / d.length : 0)], sections: [{ title: 'Diesel', columns: dieselCols, rows: d }] };
     }
     case 'employees': {

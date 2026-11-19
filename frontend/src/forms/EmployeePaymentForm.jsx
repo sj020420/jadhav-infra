@@ -18,7 +18,12 @@ export default function EmployeePaymentForm({ initial, onDone, onCancel }) {
       return e;
     },
     async (v) => {
-      await save('employee_payments', { ...v, name: v.name.trim(), amount: Number(v.amount) });
+      await save('employee_payments', {
+        ...(initial?.id ? { id: initial.id } : {}),
+        ...v,
+        name: v.name.trim(),
+        amount: Number(v.amount),
+      });
       notify(initial ? 'Payment updated' : 'Payment saved');
       onDone();
     },

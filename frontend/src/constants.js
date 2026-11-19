@@ -13,3 +13,5 @@ export const PAY_STATUS = ['Paid', 'Unpaid', 'Partial'];
 export const EXPENSE_TYPES = ['Diesel', 'Driver Salary', 'Employee Salary', 'Food', 'Transportation', 'Repairs', 'Maintenance', 'Spare Parts', 'Other'];
 export const PERSON_TYPES = ['Driver', 'Employee'];
 export const CATS = ['Diesel', 'Driver', 'Employee', 'Repair', 'Maintenance', 'Other'];
+export const DIESEL_PAYMENT_BY = ['Ashish Jadhav', 'Shubham Waghmode'];
+

@@ -19,7 +19,13 @@ export default function CustomerForm({ initial, onDone, onCancel }) {
     async (v) => {
       const { jobs, hours, total, paid, pending, ...rest } = v; // strip computed fields
       const name = v.name.trim() || (v.mobile.trim() ? `Customer (${v.mobile.trim()})` : 'Customer');
-      await save('customers', { ...rest, name, mobile: v.mobile.trim(), gstin: (v.gstin || '').trim().toUpperCase() });
+      await save('customers', {
+        ...(initial?.id ? { id: initial.id } : {}),
+        ...rest,
+        name,
+        mobile: v.mobile.trim(),
+        gstin: (v.gstin || '').trim().toUpperCase(),
+      });
       notify(initial ? 'Customer updated' : 'Customer added');
       onDone();
     },

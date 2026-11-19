@@ -73,23 +73,27 @@ export function invoicePdf(inv) {
   doc.text(`Invoice Date: ${fmtDate(inv.date)}`, w - 30, 120, { align: 'right' });
   doc.setFont('helvetica', 'bold').text('Bill To:', 30, y + 6);
   doc.setFont('helvetica', 'normal');
-  const c = inv.customer;
+  const c = inv.customer || { name: inv.customerName || 'Customer', mobile: inv.mobile, address: inv.address, gstin: inv.gstin };
   const lines = [c.name, c.mobile && `Mobile: ${c.mobile}`, c.address, c.gstin && `GSTIN: ${c.gstin}`].filter(Boolean);
   lines.forEach((l, i) => doc.text(String(l), 30, y + 20 + i * 13));
   y += 30 + lines.length * 13;
-  const k = inv.work;
+  const k = inv.work || {};
+  const hoursVal = inv.hours !== undefined && inv.hours !== null && inv.hours !== '' ? inv.hours : k.hours;
+  const priceVal = inv.price !== undefined && inv.price !== null && inv.price !== '' ? inv.price : k.rate;
+  const finalPriceVal = inv.finalPrice !== undefined && inv.finalPrice !== null && inv.finalPrice !== '' ? inv.finalPrice : inv.grandTotal ?? k.finalPrice ?? k.amount ?? 0;
+
   autoTable(doc, {
     startY: y, margin: { left: 30, right: 30 },
-    head: [['Date', 'Description of Work', 'Site', 'Start', 'End', 'Hours', 'Rate/Hr', 'Amount']],
-    body: [[fmtDate(k.date), k.description, k.location || '-', k.start, k.end, k.hours, pinr(k.rate), pinr(k.amount)]],
+    head: [['Date', 'Description of Work', 'Site', 'Hours', 'Price', 'Final Price']],
+    body: [[fmtDate(inv.date || k.date), k.description || inv.description || 'JCB Work', k.location || inv.location || '-', hoursVal !== undefined && hoursVal !== null ? `${hoursVal} hrs` : '-', priceVal !== undefined && priceVal !== null ? pinr(priceVal) : '-', pinr(finalPriceVal)]],
     styles: { fontSize: 9 }, headStyles: { fillColor: [15, 118, 110] },
   });
-  const rows = [['Subtotal', pinr(inv.subtotal)]];
+  const rows = [['Subtotal', pinr(inv.subtotal ?? finalPriceVal)]];
   if (inv.gstEnabled) {
     if (inv.igst) rows.push([`IGST @ ${inv.gstRate}%`, pinr(inv.gstAmount)]);
     else rows.push([`CGST @ ${inv.gstRate / 2}%`, pinr(inv.gstAmount / 2)], [`SGST @ ${inv.gstRate / 2}%`, pinr(inv.gstAmount / 2)]);
   }
-  rows.push(['Grand Total', pinr(inv.grandTotal)], ['Paid Amount', pinr(inv.paid)], ['Pending Amount', pinr(inv.pending)]);
+  rows.push(['Grand Total', pinr(inv.grandTotal ?? finalPriceVal)], ['Paid Amount', pinr(inv.paid ?? 0)], ['Pending Amount', pinr(inv.pending ?? 0)]);
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 12, margin: { left: w - 260, right: 30 }, theme: 'plain', body: rows,
     styles: { fontSize: 10 }, columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },

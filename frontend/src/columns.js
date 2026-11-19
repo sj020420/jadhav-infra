@@ -28,9 +28,8 @@ export const dieselCols = [
   { key: 'date', label: 'Date', type: 'date' },
   { key: 'machine', label: 'Machine' },
   { key: 'litres', label: 'Litres' },
-  { key: 'rate', label: 'Rate/Litre', type: 'money' },
-  { key: 'total', label: 'Total Cost', type: 'money' },
-  { key: 'supplier', label: 'Petrol Pump / Supplier' },
+  { key: 'finalPrice', label: 'Final Price', type: 'money', val: (r) => r.finalPrice ?? r.total },
+  { key: 'paymentBy', label: 'Payment By' },
   { key: 'method', label: 'Payment Method' },
   { key: 'notes', label: 'Notes' },
 ];

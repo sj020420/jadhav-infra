@@ -8,7 +8,7 @@ export default function DataTable({ columns, rows, actions, sort, onSort, empty 
   // Helper to extract clean mobile card fields
   const renderMobileCard = (r, i) => {
     // 1. Primary Title
-    let title = r.customerName || r.name || r.supplier || r.description || r.number;
+    let title = r.customerName || r.name || (r.litres ? `${r.machine || 'JCB'} Diesel (${r.litres} L)` : r.description || r.number);
     if (!title && r.date) title = disp({ type: 'date', key: 'date' }, r);
     if (!title) title = (columns && columns[0] ? cellVal(columns[0], r) : null) || 'Record';
 
@@ -25,19 +25,19 @@ export default function DataTable({ columns, rows, actions, sort, onSort, empty 
     if (r.location) meta.push({ ico: '📍', label: 'Site', val: r.location });
     if (r.hours !== undefined && r.hours !== null) meta.push({ ico: '⏱️', label: 'Hours', val: `${r.hours} hrs` });
     if (r.rate && !r.litres) meta.push({ ico: '🏷️', label: 'Rate', val: `${inr(r.rate)}/hr` });
-    if (r.machine && !r.workType) meta.push({ ico: '🚜', label: 'Machine', val: r.machine });
-    if (r.litres) meta.push({ ico: '⛽', label: 'Diesel', val: `${r.litres} L` });
-    if (r.rate && r.litres) meta.push({ ico: '🏷️', label: 'Rate', val: `${inr(r.rate)}/L` });
+    if (r.machine && !r.workType && !r.litres) meta.push({ ico: '🚜', label: 'Machine', val: r.machine });
+    if (r.litres && !title.includes('Diesel')) meta.push({ ico: '⛽', label: 'Diesel', val: `${r.litres} L` });
+    if (r.paymentBy) meta.push({ ico: '👤', label: 'Payment By', val: r.paymentBy });
     if (r.type && !r.workType) meta.push({ ico: '🧾', label: 'Type', val: r.type });
     if (r.reason) meta.push({ ico: '📝', label: 'Reason', val: r.reason });
     if (r.mobile && r.customerName !== r.name) meta.push({ ico: '📞', label: 'Mobile', val: r.mobile });
     if (r.jobs !== undefined && r.jobs !== null) meta.push({ ico: '🚜', label: 'Total Jobs', val: `${r.jobs} jobs` });
     if (r.paidTo) meta.push({ ico: '👤', label: 'Paid To', val: r.paidTo });
-    if (r.supplier && title !== r.supplier) meta.push({ ico: '⛽', label: 'Supplier', val: r.supplier });
     if (r.method) meta.push({ ico: '💳', label: 'Method', val: r.method });
     if (r.personType) meta.push({ ico: '👷', label: 'Role', val: r.personType });
 
     // 4. Financial highlights
+    const hasFinalPrice = r.finalPrice !== undefined && r.finalPrice !== null;
     const hasTotal = r.total !== undefined && r.total !== null;
     const hasGrand = r.grandTotal !== undefined && r.grandTotal !== null;
     const hasAmount = r.amount !== undefined && r.amount !== null;
@@ -45,8 +45,9 @@ export default function DataTable({ columns, rows, actions, sort, onSort, empty 
     const hasExpense = r.expense !== undefined && r.expense !== null;
     const hasProfit = r.profit !== undefined && r.profit !== null;
 
-    const finalAmount = hasTotal ? inr(r.total) : hasGrand ? inr(r.grandTotal) : hasAmount ? inr(r.amount) : hasIncome ? inr(r.income) : null;
-    const finalLabel = hasTotal ? 'Final Total' : hasGrand ? 'Grand Total' : hasAmount ? 'Amount' : hasIncome ? 'Income' : 'Total';
+    const finalAmount = hasFinalPrice ? inr(r.finalPrice) : hasTotal ? inr(r.total) : hasGrand ? inr(r.grandTotal) : hasAmount ? inr(r.amount) : hasIncome ? inr(r.income) : null;
+    const finalLabel = hasFinalPrice ? 'Final Price' : hasTotal ? 'Final Total' : hasGrand ? 'Grand Total' : hasAmount ? 'Amount' : hasIncome ? 'Income' : 'Total';
+
 
     const pendingVal = r.pending !== undefined && Number(r.pending) > 0 ? inr(r.pending) : null;
     const paidVal = r.paid !== undefined && Number(r.paid) > 0 ? inr(r.paid) : null;

@@ -17,7 +17,11 @@ export default function ExpenseForm({ initial, onDone, onCancel }) {
     },
     async (v) => {
       const { source, ...rest } = v;
-      await save('expenses', { ...rest, amount: Number(v.amount) });
+      await save('expenses', {
+        ...(initial?.id ? { id: initial.id } : {}),
+        ...rest,
+        amount: Number(v.amount),
+      });
       notify(initial ? 'Expense updated' : 'Expense saved');
       onDone();
     },

@@ -3,15 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useData } from '../DataContext.jsx';
 import { catOf, sum, unified } from '../calc.js';
 import { fmt12, fmtDate, inr, today } from '../utils.js';
-import { Modal, PageHeader, SummaryCard } from '../components/ui.jsx';
+import { Confirm, Modal, PageHeader, SummaryCard } from '../components/ui.jsx';
 import DataTable from '../components/DataTable.jsx';
 import PaymentForm from '../forms/PaymentForm.jsx';
+import JcbWorkForm from '../forms/JcbWorkForm.jsx';
 
 export default function Dashboard() {
-  const { D } = useData();
+  const { D, remove, notify } = useData();
   const nav = useNavigate();
   const [view, setView] = useState(null);
   const [pay, setPay] = useState(null);
+  const [editJob, setEditJob] = useState(null);
+  const [delJob, setDelJob] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   const t = today(), ym = t.slice(0, 7);
   const ex = unified(D);
@@ -35,6 +39,20 @@ export default function Dashboard() {
     { key: 'total', label: 'Final Total', type: 'money' },
     { key: 'status', label: 'Payment', badge: true },
   ];
+
+  const doDeleteJob = async () => {
+    if (!delJob) return;
+    setBusy(true);
+    try {
+      await remove('jobs', delJob.id);
+      notify('Job deleted successfully');
+      setDelJob(null);
+    } catch (e) {
+      notify(e.message, 'err');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div>
@@ -88,10 +106,12 @@ export default function Dashboard() {
           actions={(r) => (
             <>
               <button className="btn sm" onClick={() => setView(r)}>👁 View</button>
+              <button className="btn sm" onClick={() => setEditJob(r)}>✏️ Edit</button>
               {r.pending > 0 && (
                 <button className="btn sm primary" onClick={() => setPay(r)}>💵 Pay</button>
               )}
               <button className="btn sm" onClick={() => nav(`/invoices?job=${r.id}`)}>📄 Invoice</button>
+              <button className="btn sm danger-o" onClick={() => setDelJob(r)}>🗑 Delete</button>
             </>
           )}
         />
@@ -102,6 +122,27 @@ export default function Dashboard() {
         <Modal title={`Receive Payment - ${pay.customerName}`} onClose={() => setPay(null)}>
           <PaymentForm job={pay} onDone={() => setPay(null)} onCancel={() => setPay(null)} />
         </Modal>
+      )}
+
+      {/* Edit Job Modal */}
+      {editJob && (
+        <Modal title="Edit JCB Work" onClose={() => setEditJob(null)}>
+          <JcbWorkForm
+            initial={editJob}
+            onDone={() => setEditJob(null)}
+            onCancel={() => setEditJob(null)}
+          />
+        </Modal>
+      )}
+
+      {/* Delete Confirmation */}
+      {delJob && (
+        <Confirm
+          text={`Delete job for ${delJob.customerName} on ${fmtDate(delJob.date)}? This cannot be undone.`}
+          busy={busy}
+          onNo={() => setDelJob(null)}
+          onYes={doDeleteJob}
+        />
       )}
 
       {/* View Modal */}
@@ -134,13 +175,43 @@ export default function Dashboard() {
             ))}
             {view.notes && <><span>Notes</span><b>{view.notes}</b></>}
           </div>
-          {view.pending > 0 && (
-            <div style={{ marginTop: '1rem', textAlign: 'right' }}>
-              <button className="btn primary" onClick={() => { const j = view; setView(null); setPay(j); }}>
-                💵 Receive Payment ({inr(view.pending)} Pending)
+
+          <div className="form-actions" style={{ marginTop: '1rem', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <button
+              className="btn danger-o"
+              onClick={() => {
+                const j = view;
+                setView(null);
+                setDelJob(j);
+              }}
+            >
+              🗑 Delete Job
+            </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  const j = view;
+                  setView(null);
+                  setEditJob(j);
+                }}
+              >
+                ✏️ Edit Job
               </button>
+              {view.pending > 0 && (
+                <button
+                  className="btn primary"
+                  onClick={() => {
+                    const j = view;
+                    setView(null);
+                    setPay(j);
+                  }}
+                >
+                  💵 Receive Payment ({inr(view.pending)})
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </Modal>
       )}
     </div>

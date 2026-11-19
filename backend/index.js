@@ -86,6 +86,11 @@ app.param('c', (req, res, next, c) =>
   COLLECTIONS.includes(c) ? next() : res.status(404).json({ error: 'Unknown collection' }));
 
 app.get('/api/:c', h(async (req, res) => res.json(await list(req.params.c))));
+app.get('/api/:c/:id', h(async (req, res) => {
+  const r = await getOne(req.params.c, req.params.id);
+  if (!r) return res.status(404).json({ error: 'Record not found' });
+  res.json(r);
+}));
 app.post('/api/:c', h(async (req, res) => {
   if (!req.body || typeof req.body !== 'object') return res.status(400).json({ error: 'Invalid data' });
   const id = await insert(req.params.c, req.body);

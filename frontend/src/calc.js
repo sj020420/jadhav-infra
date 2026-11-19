@@ -18,8 +18,8 @@ export const unified = (d) => [
   ...d.expenses.map((e) => ({ ...e, source: 'expenses' })),
   ...d.diesel.map((x) => ({
     id: x.id, date: x.date, type: 'Diesel', source: 'diesel',
-    description: `${x.machine || 'JCB'} - ${x.litres} L @ Rs.${x.rate}/L`,
-    amount: x.total, method: x.method, paidTo: x.supplier, notes: x.notes,
+    description: `${x.machine || 'JCB'} - ${x.litres} L Diesel`,
+    amount: x.finalPrice ?? x.total, method: x.method, paidTo: x.paymentBy || '', notes: x.notes,
   })),
   ...d.employee_payments.filter((p) => p.status === 'Paid').map((p) => ({
     id: p.id, date: p.date, source: 'employee_payments',
